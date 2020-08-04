@@ -36,7 +36,7 @@ class _CreatePageState extends State<CreatePage> {
 
   // 갤러리에서 사진 가져오기
   Future _getImage() async {
-     var image = await picker.getImage(   //pickImage는 더 이상 사용 불가함.
+     var image = await picker.getImage(   //pickImage는 더 이상 사용 불가, 해당 부분 강의와 다름
        source: ImageSource.gallery,
        maxHeight: 480,
        maxWidth: 640,
@@ -44,7 +44,7 @@ class _CreatePageState extends State<CreatePage> {
 
      setState(() {
 //       _image = image as File;
-        _image = File(image.path);
+        _image = File(image.path);   // 이 부분은 강의와 다름
      });
 
   }
