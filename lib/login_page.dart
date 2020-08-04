@@ -35,10 +35,13 @@ class LoginPage extends StatelessWidget {
             SignInButton(
               Buttons.Google,
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TabPage()),
-                );
+
+                _handlerSignIn();  //인증
+
+//                Navigator.push(
+//                  context,
+//                  MaterialPageRoute(builder: (context) => TabPage()),
+//                );
               },
             ),
           ],
@@ -46,5 +49,25 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
+
+  // 구글 로그인을 수행하고 FirebaseUser를 반환
+   Future<FirebaseUser> _handlerSignIn() async {
+     GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+     // 구글 로그인으로 인증된 정보를 기반으로 FirebaseUser 객체를 구성
+     FirebaseUser user = (await _auth.signInWithCredential(
+       GoogleAuthProvider.getCredential(
+           idToken: googleAuth.idToken,
+           accessToken: googleAuth.accessToken))).user;
+
+     // 로그인 정보를 출력하는 로그
+     print("signed in" + user.displayName);
+     return user;
+
+     //최초 로그인 후에는 계속 로그인된 상태로 있음.
+
+   }
+
 
 }
