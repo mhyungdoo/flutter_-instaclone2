@@ -1,14 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class DetailPostPage extends StatelessWidget {
-  final document = {
-    'userPhotoUrl': '',
-    'email': 'test@test.com',
-    'displayName': '더미',
-  };
-//  final FirebaseUser user;
 
-//  DetailPostPage({this.document, this.user});
+class DetailPostPage extends StatelessWidget {
+  final DocumentSnapshot document;
+  final FirebaseUser user;
+
+  DetailPostPage(this.document, this.user);
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +73,7 @@ class DetailPostPage extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(document['contents']),
+            child: Text(document['content']), // firebase에 저장한 document의 필드명을 정확하게 작성 필요, 틀리면 에러 발생함.
           ),
         ],
       ),
