@@ -73,7 +73,7 @@ class DetailPostPage extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(document['content']), // firebase에 저장한 document의 필드명을 정확하게 작성 필요, 틀리면 에러 발생함.
+            child: Text(document['content']), // firebase에 저장한 document의 필드명을 정확하게 작성 필요, 틀리면 에러 발생함...
           ),
         ],
       ),
