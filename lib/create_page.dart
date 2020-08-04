@@ -1,13 +1,14 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreatePage extends StatefulWidget {
-//  final FirebaseUser user;
+  final FirebaseUser user;
 
-//  CreatePage(this.user);
+  CreatePage(this.user);
 
   @override
   _CreatePageState createState() => _CreatePageState();
@@ -15,6 +16,7 @@ class CreatePage extends StatefulWidget {
 
 class _CreatePageState extends State<CreatePage> {
   final textEditingController = TextEditingController();
+  final picker = ImagePicker();
 
   @override
   void initState() {
@@ -32,6 +34,16 @@ class _CreatePageState extends State<CreatePage> {
 
   // 갤러리에서 사진 가져오기
   Future _getImage() async {
+     var image = await picker.getImage(   //pickImage는 더 이상 사용 불가함.
+       source: ImageSource.gallery,
+       maxHeight: 480,
+       maxWidth: 640,
+     );
+
+     setState(() {
+//       _image = image as File;
+        _image = File(image.path);
+     });
 
   }
 
@@ -146,15 +158,17 @@ class _CreatePageState extends State<CreatePage> {
   }
 
   Widget _buildImage() {
+  //    return Image.network('https://ssl.pstatic.net/tveta/libs/1276/1276664/a82e49e30b2b61e8b7b7_20200427091410520.png');
+
     return _image == null
         ? Text('No Image')
-        : Image.file(
+          : Image.file(
             _image,
             width: 50,
             height: 50,
-            fit: BoxFit.cover,
-          );
-  }
+     fit: BoxFit.cover,
+         );
+}
 
   Widget _buildLocation() {
     final locationItems = [

@@ -59,7 +59,7 @@ class SearchPage extends StatelessWidget {
         onPressed: () {
           print('눌림');
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (BuildContext context) => CreatePage()));
+              builder: (BuildContext context) => CreatePage(user)));
         },
       ),
     );
