@@ -1,18 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'comment_page.dart';
 
+// 홈페이지에 보여지는 피드 하나에 대한 코드임
+
 class FeedWidget extends StatefulWidget {
-  final document = {
-    'userPhotoUrl': '',
-    'email': 'test@test.com',
-    'displayName': '더미',
-    'comment': 100,
-  };
+  final DocumentSnapshot document;
+  final FirebaseUser user;
 
-//  final FirebaseUser user;
-
-//  FeedWidget(this.document, this.user);
+  FeedWidget(this.document, this.user);
 
   @override
   _FeedWidgetState createState() => _FeedWidgetState();
@@ -29,7 +27,7 @@ class _FeedWidgetState extends State<FeedWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var comment = widget.document['comment'] ?? 0;
+    var commentCount = widget.document['commentCount'] ?? 0;
     return Column(
       children: <Widget>[
         ListTile(
@@ -52,7 +50,17 @@ class _FeedWidgetState extends State<FeedWidget> {
           leading: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(Icons.favorite_border),
+             widget.document['likedUsers']
+                 ?.contains(widget.user.email) ?? false
+                 ? GestureDetector(
+                    onTap: _unlike,
+                    child: Icon(Icons.favorite, color: Colors.red,))
+                 : GestureDetector(
+                    onTap: _like,
+                    child: Icon(Icons.favorite_border)),
+
+
+
               SizedBox(
                 width: 8.0,
               ),
@@ -71,7 +79,7 @@ class _FeedWidgetState extends State<FeedWidget> {
               width: 16.0,
             ),
             Text(
-              '좋아요 100개',
+              '좋아요 ${widget.document['likedUsers']?.length ?? 0}개',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0),
             ),
           ],
@@ -91,12 +99,14 @@ class _FeedWidgetState extends State<FeedWidget> {
             SizedBox(
               width: 8.0,
             ),
-            Text(widget.document['contents']),
+            Text(widget.document['content'] ?? ''),
           ],
         ),
         SizedBox(
           height: 8.0,
         ),
+
+        if (commentCount > 0)   // 댓글이 0개일 경우에는 아래에 있는 GestureDetector 위젯이 표시되지 않음
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -114,12 +124,12 @@ class _FeedWidgetState extends State<FeedWidget> {
                 Row(
                   children: <Widget>[
                     Text(
-                      '댓글 $comment개 모두 보기',
+                      '댓글 $commentCount개 모두 보기',
                       style: TextStyle(color: Colors.grey[500]),
                     ),
                   ],
                 ),
-                Text(widget.document['lastComment']),
+               Text(widget.document['lastComment'] ?? ''), // null 값을 추가하여 에러가 나지 않도록 함
               ],
             ),
           ),
@@ -150,13 +160,67 @@ class _FeedWidgetState extends State<FeedWidget> {
 
   // 좋아요
   void _like() {
+    // 기존 좋아요 리스트(array) 복사
+    final List likedUsers =
+           List<String>.from(widget.document['likedUsers'] ?? []);
+     // 나를 추가
+     likedUsers.add(widget.user.email);
+
+     //업데이트할 항목을 문서로 준비
+    final updateData = {
+       'likedUsers': likedUsers,
+    };
+    Firestore.instance.collection('post')
+       .document(widget.document.documentID)
+        .updateData(updateData);
+
   }
 
   // 좋아요 취소
   void _unlike() {
+
+    // 기존 좋아요 리스트(array) 복사
+    final List likedUsers =
+    List<String>.from(widget.document['likedUsers'] ?? []);
+    // 나를 추가
+    likedUsers.remove(widget.user.email);
+
+    //업데이트할 항목을 문서로 준비
+    final updateData = {
+      'likedUsers': likedUsers,
+    };
+    Firestore.instance.collection('post')
+        .document(widget.document.documentID)
+        .updateData(updateData);
+
+
   }
 
   // 댓글 작성
   void _writeComment(String text) {
+    final data = {
+      'writer': widget.user.email,
+      'comment': text,
+    };
+
+     // 댓글 추가
+    Firestore.instance
+       .collection('post')
+       .document(widget.document.documentID)
+       .collection('comment')
+       .add(data);
+
+     // 마지막 댓글과 댓글 수 갱신
+    final updateData = {
+      'lastComment' : text,
+       'commentCount' : (widget.document['commentCount'] ?? 0) + 1,
+    };
+
+    Firestore.instance
+     .collection('post')
+    .document(widget.document.documentID)
+    .updateData(updateData);
+
+
   }
 }
